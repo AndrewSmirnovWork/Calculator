@@ -54,7 +54,7 @@ public class Calc {
                 return RPN;
             }
         }
-        if(isOperator(RPN.get(RPN.size()-1))) System.out.println("Wrong expression");
+        //if(isOperator(RPN.get(RPN.size()-1))) System.out.println("Wrong expression");
         return RPN;
     }
 
