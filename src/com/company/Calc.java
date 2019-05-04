@@ -1,16 +1,13 @@
 package com.company;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
-import java.util.Stack;
+
+import java.util.*;
 
 public class Calc {
+    private static String delimetr = "()+-*/ ";
+    private static String operator = "+-*/";
 
     private static boolean isDelimetr(String input){
-        String delimetr = "()+-*/";
         for(int i = 0; i < delimetr.length(); i++){
             if(input.charAt(0) == delimetr.charAt(i)) return true;
         }
@@ -18,34 +15,46 @@ public class Calc {
     }
 
     private static boolean isOperator(String input){
-        String operator = "+-*/";
         for(int i = 0; i < operator.length(); i++){
             if(input.charAt(0) == operator.charAt(i)) return true;
         }
         return false;
     }
-    private static List<String> toRPN(String regular){
-        Stack<String> stack = new Stack<String>();
+    private static int priority(String input) {
+        if (input.equals("-") || input.equals("+")) return 0;
+        else return 1;
+    }
+
+    private static List<String> toRPN(String input){
+        StringTokenizer token = new StringTokenizer(input, delimetr, true);
+        Stack<String> stack = new Stack<>();
         List<String> RPN = new ArrayList<>();
-        for(int i = 0; i<regular.length(); i++){
-            String element = String.valueOf(regular.charAt(i));
-            if(element.equals(" ")) continue;
-            if(isDelimetr(element)){
-                if(element.equals("(")) stack.push(element);
-                else if (element.equals(")")){
-                    while(!stack.peek().equals("(")){
+        while(token.hasMoreTokens()) {
+            String strToken = token.nextToken();
+            if (strToken.equals(" ")) continue;
+            if (isDelimetr(strToken)) {
+                if (strToken.equals("(")) stack.push(strToken);
+                else if (strToken.equals(")")) {
+                    while (!stack.peek().equals("(")) {
                         RPN.add(stack.pop());
-                        if(stack.isEmpty()){
+                        if (stack.isEmpty()) {
                             System.out.println("Wrong expression, Bracket is not open");
                             return RPN;
                         }
-
                     }
                     stack.pop();
                 }
-                else stack.push(element);
-            }
-            else RPN.add(element);
+                else if(!stack.isEmpty())
+                {
+                    if (priority(strToken) >= priority(stack.peek())) {
+                    stack.push(strToken);
+                } else {
+                                 RPN.add(stack.pop());
+                                stack.push(strToken);
+                        }
+                }
+                else stack.add(strToken);
+            } else RPN.add(strToken);
         }
         while(!stack.isEmpty()){
             if(isOperator(stack.peek())) RPN.add(stack.pop());
@@ -63,8 +72,8 @@ public class Calc {
         for(String list : RPN) {
             switch (list) {
                 case "-": {
-                    Double b = (double) stack.pop();
-                    Double a = (double) stack.pop();
+                    Double b = stack.pop();
+                    Double a = stack.pop();
                     stack.push(a - b);
                     break;
                 }
@@ -75,8 +84,8 @@ public class Calc {
                     stack.push(stack.pop() * stack.pop());
                     break;
                 case "/": {
-                    Double b = (double) stack.pop();
-                    Double a = (double) stack.pop();
+                    Double b = stack.pop();
+                    Double a = stack.pop();
                     stack.push(a / b);
                     break;
                 }
